@@ -8,7 +8,7 @@ fetch('http://localhost:3000/api/products/')
         createCards(data);
     })
     .catch((error) => {
-        console.log("Error from API");
+        console.log("Error");
     })
 
 

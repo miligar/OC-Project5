@@ -2,8 +2,6 @@ const params = new URLSearchParams(window.location.search);
 const idProduct = params.get('id');
 console.log(idProduct);
 
-
-
 fetch('http://localhost:3000/api/products/' + idProduct)
 .then(response => {return response.json();
 })
@@ -11,7 +9,7 @@ fetch('http://localhost:3000/api/products/' + idProduct)
    console.log(data);
    productDisplay(data);
 })
-.catch((error) => {console.log("Error from API");})
+.catch((error) => {console.log("Error");})
 
 function productDisplay(product){
 
@@ -50,23 +48,22 @@ function cartBuild () {
 
     let cartArray = [];
 
-    addButton.addEventListener('click', ($event) => {
+    addButton.addEventListener('click', () => {
 
         if(localStorage.getItem('cartArray')!==null){
           cartArray = JSON.parse(localStorage.getItem('cartArray'));
         }
 
-        let newItem = {};
         if (productQuantity.value>=1 && productQuantity.value <=100 && color.value){
-            newItem = {
+            let  newItem = {
                 idProduct: idProduct,
                 quantity: parseInt(productQuantity.value),
                 color: color.value
             };
             let idToLook = newItem.idProduct;
-            let findItem = cartArray.find((idProduct, idToLook) => {
-                if (idProduct.color === newItem.color) {
-                    idProduct.quantity =  idProduct.quantity + newItem.quantity;
+            let findItem = cartArray.find((o, idToLook) => {
+                if (o.color === newItem.color) {
+                    o.quantity =  o.quantity + newItem.quantity;
                     return true;
                 } 
             });
