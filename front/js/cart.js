@@ -3,16 +3,23 @@ fetch('http://localhost:3000/api/products/')
      })
     .then(data => {
         console.log(data);
-        cartPage(data);
+        allproducts=data;
+        cartPage(data);    
+
     })
     .catch((error) => {
         console.log("Error");
     })
 
 
-  //import array from localStorage 
+////////////////////////////////////////////////////
+let allproducts;
 let cartArray = JSON.parse(localStorage.getItem('cartArray'));
 console.log(cartArray);
+if(cartArray===null){
+  let message = document.querySelector('h1');
+  message.textContent = 'Your cart is empty';
+}
 
 let totalQuantity = document.getElementById('totalQuantity');
 let totalPrice = document.getElementById('totalPrice');
@@ -77,8 +84,9 @@ let itemDelete = document.createElement('p');
 itemDelete.textContent = 'Delete';
 itemDelete.classList.add("deleteItem");
 itemSettingsDelete.appendChild(itemDelete);
-////////////////
-//builds the cart table using data from local storage and from API
+
+//////////////////////////////////////////////
+
 
 function cartPage(products) {
 
@@ -122,41 +130,66 @@ function cartPage(products) {
 
   }; //end of FOR loop
 
+changeQuantity();
+deleteItems();
+}  //end of cartPage() function
 
-  //MODIFIYING QUANTITIES IN THE CART AND SUBSEQUENTLY TOTAL PRICE
-  let inputValues = document.getElementsByClassName('itemQuantity');
-  totalQuantity.textContent = articlesCount;
-  totalPrice.textContent = priceCount; 
+/////////////////////////////////////////////////////////////////////
 
-  //EVENTLISTENER FOR CHANGES ON INPUT FIELDS OF QUANTITY
-  for(let i=0; i<inputValues.length;i++){
-    inputValues[i].addEventListener('change', () => {
+//CHANGES QUANTITY OF AN ITEM WHEN NEW VALUE OR CLICK
+
+let inputValues = document.getElementsByClassName('itemQuantity');
+
+function changeQuantity(){
+
+  for(let i=0; i<inputValues.length; i++){
+
+    inputValues[i].addEventListener('change', ($event) => {
+      $event.preventDefault();
+      if(inputValues[i]){
       cartArray[i].quantity = parseInt(inputValues[i].value);
-      console.log(cartArray);
+      }
+      let provisionalCartArray = [];
+      for(let i=0; i<cartArray.length; i++){
+        if(cartArray[i].quantity != 0) {
+          provisionalCartArray.push(cartArray[i])
+        } else{
+        let deleteItem = document.querySelectorAll('.deleteItem');
+        let itemToDelete = deleteItem[i].closest('article');
+        itemToDelete.parentNode.removeChild(itemToDelete);
+        }
+      }
+      cartArray = provisionalCartArray;
       localStorage.setItem('cartArray', JSON.stringify(cartArray));
-      newQntyPrice();      
-    })
-  }
-  //CHANGES TOTAL QUANTITY AND PRICE WITH THE EVENT
-  function newQntyPrice() {
-    let sumArticles = 0;
-    let sumPrices = 0;
-    if(cartArray.length==0){
-      totalQuantity.textContent = 0;
-      totalPrice.textContent = 0;
-    }
-    for(let i=0; i<cartArray.length;i++){
-      let idItem = cartArray[i].idProduct;
-      sumArticles += cartArray[i].quantity;
-      let findItem = products.find(({_id})=>_id===idItem);
-      sumPrices += cartArray[i].quantity*parseInt(findItem.price);
-      totalQuantity.textContent = sumArticles;
-      totalPrice.textContent = sumPrices; 
-    }
+      provisionalCartArray = []; 
+  
 
+      newQntyPrice(allproducts);    
+     })
   }
-  //EVENTLISTENER FOR DELETING ITEM IN CART
+}
+  
+//CHANGES TOTAL QUANTITY AND PRICE WITH THE EVENT
+function newQntyPrice(allproducts) {
+  let sumArticles = 0;
+  let sumPrices = 0;
+  if(cartArray.length==0){
+    totalQuantity.textContent = 0;
+    totalPrice.textContent = 0;
+  }
+  for(let i=0; i<cartArray.length;i++){
+    let idItem = cartArray[i].idProduct;
+    sumArticles += cartArray[i].quantity;
+    let findItem = allproducts.find(({_id})=>_id===idItem);
+    sumPrices += cartArray[i].quantity*parseInt(findItem.price);
+    totalQuantity.textContent = sumArticles;
+    totalPrice.textContent = sumPrices; 
+  }
+  console.log(cartArray);
+}
 
+//EVENTLISTENER FOR DELETING ITEM IN CART
+function deleteItems(){
   let deleteItem = document.querySelectorAll('.deleteItem');
   deleteLength = deleteItem.length;
  
@@ -178,61 +211,116 @@ function cartPage(products) {
           } 
       }
     }
-
     cartArray = provisionalCartArray;
     localStorage.setItem('cartArray', JSON.stringify(cartArray));
-    console.log(cartArray);
     provisionalCartArray = [];
-
-    newQntyPrice(); 
-
-    })//close eventListener
+    changeQuantity();
+    newQntyPrice(allproducts);    
+ 
+    })//close eventListener for delete
 
   }
+}
 
-}  //end of cartPage() function
+///////////////////////////////////////////////////////////////////
+
+const formInput = document.querySelector('.cart__order__form');
+
+//REGULAR EXPRESION IN ORDER FOR THE INPUT FIELDS
+let regArray = [/^[a-zA-Z '-]+$/, /^[a-zA-Z '-]+$/, /^[^- ][a-zA-Z '-àâäéèêëïîôöùûü0-9]*[^- ]$/,/^[a-zA-Z '-]+$/, /\S+@\S+\.\S+/];
+
+let formValidation = {
+  firstNameValidation: false,
+  lastNameValidation: false,
+  addressValidation: false,
+  cityValidation: false,
+  emailValidation: false
+}
+
+for(let i=0; i<5; i++){
+  formInput[i].value='';
+}
+
+for(let i=0; i<5; i++){
+  formInput[i].addEventListener('change', function (){
+    formValidation[Object.keys(formValidation)[i]] = validate(formInput[i], regArray[i]);
+    console.log(formValidation);
+  })
+}
+
+function validate(input, regex) {
+    if(regex.test(input.value)) {
+     input.style.border = 'thin solid green';
+     input.nextElementSibling.textContent = '';
+      return true
+    } else {
+      input.nextElementSibling.textContent = 'Invalid';
+      input.style.border = 'thin solid red';
+      return false
+    }
+}
 
 const submit = document.getElementById('order');
 
 submit.addEventListener('click', ($event) => {
-$event.preventDefault();
+  $event.preventDefault();
+  if(
+    formValidation.firstNameValidation== true&&
+    formValidation.lastNameValidation===true&&
+    formValidation.addressValidation===true&&
+    formValidation.cityValidation===true&&
+    formValidation.emailValidation===true
+  ){
 
-const formInput = document.querySelector('.cart__order__form');
+    const formInput = document.querySelector('.cart__order__form');
 
-const contact ={
-  firstName: formInput.firstName.value,
-  lastName: formInput.lastName.value,
-  address: formInput.address.value,
-  city: formInput.city.value,
-  email: formInput.email.value
-};
+    const contact ={
+      firstName: formInput.firstName.value,
+      lastName: formInput.lastName.value,
+      address: formInput.address.value,
+      city: formInput.city.value,
+      email: formInput.email.value
+    };
 
-let products = [];
-for(let i=0; i<cartArray.length; i++) {
-  products[i] = cartArray[i].idProduct;
-}
+    let products = [];
+    for(let i=0; i<cartArray.length; i++) {
+      products[i] = cartArray[i].idProduct;
+    }
 
-let orderData = { contact, products}
+    let orderData = {contact, products};
 
-fetch('http://localhost:3000/api/products/order', {
-  method: 'POST', 
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(orderData)
 
-})
-.then(response => {return response.json();
-})
-.then(data => {
-  console.log(data.orderId);
+    fetch('http://localhost:3000/api/products/order', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+      })
 
+      .then(response => {return response.json();
+      })
+
+      .then(data => {
+        console.log(data.orderId);
+        window.location.href = 'confirmation.html?id=' + data.orderId;
+      })
+
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+
+    } else {
+        if(cartArray===null){
+          alert('Your cart is empty')
+        } else {
+            for(i=0; i<Object.keys(formValidation).length; i++) {
+              if(formValidation[Object.keys(formValidation)[i]]===false){
+                formInput[i].nextElementSibling.textContent = 'Invalid';
+                formInput[i].style.border = 'thin solid red';
+              }
+            }
+          }
+    }
   
- window.location.href = 'confirmation.html?id=' + data.orderId;
-
-})
-.catch((error) => {
-  console.error('Error:', error);
-});
-
 })
