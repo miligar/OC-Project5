@@ -92,7 +92,7 @@ itemSettingsDelete.appendChild(itemDelete);
 
 //////////////////////////////////////////////
 
-
+//BUILDS THE TABLE OF PRODUCTS
 function cartPage(products) {
 
   //cart table will be generated for each element in the cart
@@ -254,6 +254,7 @@ for(let i=0; i<5; i++){
   })
 }
 
+//WITH INPUT FROM THE FORM AND REGULAR EXPRESIONS, IT CHECKS VALIDITY
 function validate(input, regex) {
     if(regex.test(input.value)) {
      input.style.border = 'thin solid green';
