@@ -16,10 +16,15 @@ fetch('http://localhost:3000/api/products/')
 let allproducts;
 let cartArray = JSON.parse(localStorage.getItem('cartArray'));
 console.log(cartArray);
-if(cartArray===null){
+
+function cartEmpty(){
+if(cartArray===null||cartArray.length===0){
   let message = document.querySelector('h1');
   message.textContent = 'Your cart is empty';
 }
+};
+cartEmpty();
+
 
 let totalQuantity = document.getElementById('totalQuantity');
 let totalPrice = document.getElementById('totalPrice');
@@ -135,9 +140,9 @@ deleteItems();
 }  //end of cartPage() function
 
 /////////////////////////////////////////////////////////////////////
+//EVENT LISTENERS
 
 //CHANGES QUANTITY OF AN ITEM WHEN NEW VALUE OR CLICK
-
 let inputValues = document.getElementsByClassName('itemQuantity');
 
 function changeQuantity(){
@@ -163,7 +168,7 @@ function changeQuantity(){
       localStorage.setItem('cartArray', JSON.stringify(cartArray));
       provisionalCartArray = []; 
   
-
+      cartEmpty();
       newQntyPrice(allproducts);    
      })
   }
@@ -214,6 +219,7 @@ function deleteItems(){
     cartArray = provisionalCartArray;
     localStorage.setItem('cartArray', JSON.stringify(cartArray));
     provisionalCartArray = [];
+    cartEmpty();
     changeQuantity();
     newQntyPrice(allproducts);    
  
@@ -223,7 +229,7 @@ function deleteItems(){
 }
 
 ///////////////////////////////////////////////////////////////////
-
+//VALIDATION OF INPUT FIELDS
 const formInput = document.querySelector('.cart__order__form');
 
 //REGULAR EXPRESION IN ORDER FOR THE INPUT FIELDS
@@ -259,7 +265,9 @@ function validate(input, regex) {
       return false
     }
 }
+//////////////////////////////////////
 
+//SUBMIT EVENT
 const submit = document.getElementById('order');
 
 submit.addEventListener('click', ($event) => {
@@ -269,7 +277,9 @@ submit.addEventListener('click', ($event) => {
     formValidation.lastNameValidation===true&&
     formValidation.addressValidation===true&&
     formValidation.cityValidation===true&&
-    formValidation.emailValidation===true
+    formValidation.emailValidation===true&&
+    cartArray!=null&&
+    cartArray.length!=0
   ){
 
     const formInput = document.querySelector('.cart__order__form');
@@ -282,7 +292,7 @@ submit.addEventListener('click', ($event) => {
       email: formInput.email.value
     };
 
-    let products = [];
+    const products = [];
     for(let i=0; i<cartArray.length; i++) {
       products[i] = cartArray[i].idProduct;
     }
@@ -311,7 +321,7 @@ submit.addEventListener('click', ($event) => {
       });
 
     } else {
-        if(cartArray===null){
+        if(cartArray===null||cartArray.length===0){
           alert('Your cart is empty')
         } else {
             for(i=0; i<Object.keys(formValidation).length; i++) {
