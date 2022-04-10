@@ -146,28 +146,15 @@ deleteItems();
 let inputValues = document.getElementsByClassName('itemQuantity');
 
 function changeQuantity(){
-
   for(let i=0; i<inputValues.length; i++){
-
-    inputValues[i].addEventListener('change', ($event) => {
-      $event.preventDefault();
-      if(inputValues[i]){
+    inputValues[i].addEventListener('change', () => {
+      if(inputValues[i].value!=0){
       cartArray[i].quantity = parseInt(inputValues[i].value);
+      }else{
+        cartArray[i].quantity = 1;
+        inputValues[i].value = 1;
       }
-      let provisionalCartArray = [];
-      for(let i=0; i<cartArray.length; i++){
-        if(cartArray[i].quantity != 0) {
-          provisionalCartArray.push(cartArray[i])
-        } else{
-        let deleteItem = document.querySelectorAll('.deleteItem');
-        let itemToDelete = deleteItem[i].closest('article');
-        itemToDelete.parentNode.removeChild(itemToDelete);
-        }
-      }
-      cartArray = provisionalCartArray;
       localStorage.setItem('cartArray', JSON.stringify(cartArray));
-      provisionalCartArray = []; 
-  
       cartEmpty();
       newQntyPrice(allproducts);    
      })
@@ -202,26 +189,26 @@ function deleteItems(){
   for(let i=0; i<deleteLength; i++) {
 
     deleteItem[i].addEventListener('click', () => {
-    const itemToDelete = deleteItem[i].closest('article');
-    const idToDelete = itemToDelete.dataset.id;
-    const colorToDelete = itemToDelete.dataset.color;
-    itemToDelete.parentNode.removeChild(itemToDelete);
+      const itemToDelete = deleteItem[i].closest('article');
+      const idToDelete = itemToDelete.dataset.id;
+      const colorToDelete = itemToDelete.dataset.color;
+      itemToDelete.parentNode.removeChild(itemToDelete);
 
-    for(let i=0; i<cartArray.length; i++){
-      if(cartArray[i].idProduct != idToDelete) {
-        provisionalCartArray.push(cartArray[i])
-      } else {
-          if(cartArray[i].color != colorToDelete) {
+      for(let i=0; i<cartArray.length; i++){
+        if(cartArray[i].idProduct != idToDelete) {
           provisionalCartArray.push(cartArray[i])
-          } 
+        } else {
+            if(cartArray[i].color != colorToDelete) {
+            provisionalCartArray.push(cartArray[i])
+            } 
+        }
       }
-    }
-    cartArray = provisionalCartArray;
-    localStorage.setItem('cartArray', JSON.stringify(cartArray));
-    provisionalCartArray = [];
-    cartEmpty();
-    changeQuantity();
-    newQntyPrice(allproducts);    
+      cartArray = provisionalCartArray;
+      localStorage.setItem('cartArray', JSON.stringify(cartArray));
+      provisionalCartArray = [];
+      location.reload();
+      cartEmpty();
+      newQntyPrice(allproducts);    
  
     })//close eventListener for delete
 
