@@ -5,7 +5,8 @@ fetch('http://localhost:3000/api/products/')
         console.log(data);
         allproducts=data;
         cartPage(data);    
-
+        changeQuantity();
+        deleteItems();
     })
     .catch((error) => {
         console.log("Error");
@@ -135,8 +136,7 @@ function cartPage(products) {
 
   }; //end of FOR loop
 
-changeQuantity();
-deleteItems();
+
 }  //end of cartPage() function
 
 /////////////////////////////////////////////////////////////////////
@@ -150,6 +150,7 @@ function changeQuantity(){
     inputValues[i].addEventListener('change', () => {
       if(inputValues[i].value!=0){
       cartArray[i].quantity = parseInt(inputValues[i].value);
+      inputValues[i].value=cartArray[i].quantity;
       }else{
         cartArray[i].quantity = 1;
         inputValues[i].value = 1;
